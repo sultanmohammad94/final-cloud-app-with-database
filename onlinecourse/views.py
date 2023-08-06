@@ -1,7 +1,11 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 # <HINT> Import any new Models here
-from .models import Course, Enrollment
+from .models import (
+    Course, Enrollment, 
+    Question, Choice,
+    Submission
+)
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
@@ -110,8 +114,21 @@ def enroll(request, course_id):
          # Collect the selected choices from exam form
          # Add each selected choice object to the submission object
          # Redirect to show_exam_result with the submission id
-#def submit(request, course_id):
+def submit(request, course_id):
+    if request.user.is_authenticated and request.method == "POST":
+        user = request.user
+        course = Course.objects.get(pk=course_id)
+        enromllment = Enrollment.objects.get(
+            user = user,
+            course = course
+        )
+        print(request.POST)
+        submission = Submission.objects.create(
+            enrollment = enromllment
+        )
+        return HttpResponseRedirect(reverse(viewname='onlinecourse:show_exam_result', args=(request,course.id,submission.id,)))
 
+        
 
 # <HINT> A example method to collect the selected choices from the exam form from the request object
 #def extract_answers(request):
@@ -130,7 +147,22 @@ def enroll(request, course_id):
         # Get the selected choice ids from the submission record
         # For each selected choice, check if it is a correct answer or not
         # Calculate the total score
-#def show_exam_result(request, course_id, submission_id):
+def show_exam_result(request, course_id, submission_id):
+    if request.user.is_authenticated:
+        submitted_anwsers = []
+        user = request.user
+        course = Course.objects.filter(pk=course_id)
+        submission = Submission.objects.filter(pk=submission_id)
+        for choice in submission.choices_set.all():
+            submitted_anwsers.append(choice.id)
+        context["submitted_anwsers"] = submitted_anwsers
+        return render(request, 'onlinecourse/exam_result_bootstrap.html', context)
+    else:
+        context["message"] = "No Submitted Answers"
+        return render(request, 'onlinecourse/exam_result_bootstrap.html', context)
+            
+
+
 
 
 
