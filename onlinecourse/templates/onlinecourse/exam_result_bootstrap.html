@@ -51,22 +51,39 @@
         <div class="card-columns-vertical mt-1">
         <h5 class="font-weight-bold">Exam results</h5>
             <!--HINT Display exam results-->
-                {% for item in submitted_choices %}
-                <div class="card m-1">
-                        <div class="card-header p-3 font-weight-bold">{{item.question.text}}</div>
-                        <div class="card-body">
-                            {% for choice in item.question.choice_set.all %}
-                                {% if choice in submitted_choices and choice.is_correct %}
-                                <p class="text-success">Correct answer: {{choice.text}}</p>
-                                {% elif choice not in submitted_choices and choice.is_correct %}
-                                    <p class="text-warning">Not selected: {{choice.text}}</p>
-                                    {% else %}
-                                    {{choice.text}}
-                                {% endif %}
-                            {% endfor %}
+                {% if submitted_choices|length > 0%}
+                    {% for item in submitted_choices %}
+                    <div class="card m-1">
+                            <div class="card-header p-3 font-weight-bold">{{item.question.text}}</div>
+                            <div class="card-body">
+                                {% for choice in item.question.choice_set.all %}
+                                    {% if choice in submitted_choices and choice.is_correct %}
+                                    <p class="text-success">Correct answer: {{choice.text}}</p>
+                                    {% elif choice not in submitted_choices and choice.is_correct %}
+                                        <p class="text-warning">Not selected: {{choice.text}}</p>
+                                        {% else %}
+                                        {{choice.text}}
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    {% for lesson in course.lesson_set.all %}
+                        {% for q in lesson.question_set.all %}
+                        <div class="card m-1">
+                            <div class="card-header p-3 font-weight-bold">{{q.text}} <span>Grade: <h3 class="badge badge-danger text-danger font-weight-bold text-light">0</h3></span></div>
+                            <div class="card-body">
+                                {% for cho in q.choice_set.all %}
+                                    {% if not cho.is_correct %}
+                                        <p>{{cho.text}}</p>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
                         </div>
-                </div>
-                {% endfor %}
+                        {% endfor %}
+                    {% endfor %}
+                {% endif %}
         </div>
     </div>
 </body>
